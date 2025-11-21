@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>RBX API Checker (Vercel)</title>
+  <title>RBX API Checker</title>
   <style>
     body { font-family: Arial; padding: 20px; }
     #log {
       background: #111; color: lime; padding: 10px;
       height: 300px; overflow-y: auto; white-space: pre-wrap;
     }
+    h2 { margin-bottom: 10px; }
   </style>
 </head>
 <body>
-  <h2>RBX API Checker (trigger manually)</h2>
-  <button id="checkBtn">Check Now</button>
-  <div id="log">Logs will appear here...</div>
+  <h2>RBX API Checker Logs</h2>
+  <p>Backend runs automatically every minute. Frontend shows logs here:</p>
+  <div id="log">Loading logs...</div>
 
   <script>
     const logBox = document.getElementById("log");
-    const checkBtn = document.getElementById("checkBtn");
 
     function log(msg) {
       const t = new Date().toLocaleTimeString();
@@ -25,7 +25,7 @@
       logBox.scrollTop = logBox.scrollHeight;
     }
 
-    async function checkAPI() {
+    async function fetchLog() {
       try {
         const res = await fetch("/api/checker");
         const json = await res.json();
@@ -38,8 +38,9 @@
       }
     }
 
-    checkBtn.addEventListener("click", checkAPI);
-    setInterval(checkAPI, 60000); // auto-check every 1 minute
+    // Fetch logs automatically every minute
+    fetchLog(); // initial fetch
+    setInterval(fetchLog, 60000); // repeat every minute
   </script>
 </body>
 </html>

@@ -27,8 +27,8 @@ export default async function handler(req, res) {
   }
 }
 
-// Vercel scheduled function configuration
+// Scheduled to run automatically every minute
 export const config = {
-  runtime: "edge",          // runs in Edge environment
-  schedule: "*/1 * * * *",  // every 1 minute
+  runtime: "edge",
+  schedule: "*/1 * * * *", // every minute
 };
