@@ -1,3 +1,4 @@
+// api/checker.js
 export default async function handler(req, res) {
   const apiUrl = "https://rbxcrew.com/api/user/claim?id=3&_rsc=478ms";
   const expected = { success: false, text: "Not Authorized." };
@@ -14,7 +15,7 @@ export default async function handler(req, res) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          content: `⚠️ ALERT: Unexpected API response!\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``
+          content: `⚠️ ALERT: Unexpected API response!\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``,
         }),
       });
       return res.status(200).json({ status: "ERROR", data });
@@ -25,3 +26,9 @@ export default async function handler(req, res) {
     return res.status(500).json({ status: "FAIL", error: err.message });
   }
 }
+
+// Vercel scheduled function configuration
+export const config = {
+  runtime: "edge",          // runs in Edge environment
+  schedule: "*/1 * * * *",  // every 1 minute
+};
