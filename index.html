@@ -1,40 +1,46 @@
-export default async function handler(req, res) {
-  const apiUrl = "https://rbxcrew.com/api/user/claim?id=3&_rsc=478ms";
-  const expected = { success: false, text: "Not Authorized." };
-  const webhookUrl = "https://discord.com/api/webhooks/1441352841217441845/HXBa8ITSY218xs_K4F47ABWNOuIDLYuWdP0YZHZv-J-p2wYsD2vWr3UI_9k3Z87FNcMr";
+<!DOCTYPE html>
+<html>
+<head>
+  <title>RBX API Checker</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    #log {
+      background: #111; color: lime; padding: 10px;
+      height: 300px; overflow-y: auto; white-space: pre-wrap;
+    }
+    h2 { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h2>RBX API Checker Logs</h2>
+  <p>Backend runs automatically every minute. Frontend shows logs here:</p>
+  <div id="log">Loading logs...</div>
 
-  try {
-    const apiRes = await fetch(apiUrl);
-    let data;
+  <script>
+    const logBox = document.getElementById("log");
 
-    try {
-      data = await apiRes.json();
-    } catch {
-      data = { raw: await apiRes.text() }; // fallback if JSON fails
+    function log(msg) {
+      const t = new Date().toLocaleTimeString();
+      logBox.textContent += `\n[${t}] ${msg}`;
+      logBox.scrollTop = logBox.scrollHeight;
     }
 
-    const isExpected = data.success === expected.success && data.text === expected.text;
+    async function fetchLog() {
+      try {
+        const res = await fetch("/api/checker");
+        const json = await res.json();
 
-    if (!isExpected) {
-      await fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: `⚠️ ALERT: Unexpected API response!\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``,
-        }),
-      });
-      return res.status(200).json({ status: "ERROR", data });
+        if (json.status === "OK") log("✅ OK");
+        else if (json.status === "ERROR") log("❌ ERROR — Sent to Discord");
+        else log("⚠️ FAIL — API Error");
+      } catch (err) {
+        log("❌ FETCH FAILED");
+      }
     }
 
-    return res.status(200).json({ status: "OK", data });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ status: "FAIL", error: err.message });
-  }
-}
-
-// Edge runtime + scheduled every minute
-export const config = {
-  runtime: "edge",
-  schedule: "*/1 * * * *",
-};
+    // Fetch logs automatically every minute
+    fetchLog(); // initial fetch
+    setInterval(fetchLog, 60000); // repeat every minute
+  </script>
+</body>
+</html>

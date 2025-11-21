@@ -1,4 +1,3 @@
-// api/checker.js
 export default async function handler(req, res) {
   const apiUrl = "https://rbxcrew.com/api/user/claim?id=3&_rsc=478ms";
   const expected = { success: false, text: "Not Authorized." };
@@ -6,7 +5,13 @@ export default async function handler(req, res) {
 
   try {
     const apiRes = await fetch(apiUrl);
-    const data = await apiRes.json();
+    let data;
+
+    try {
+      data = await apiRes.json();
+    } catch {
+      data = { raw: await apiRes.text() }; // fallback if JSON fails
+    }
 
     const isExpected = data.success === expected.success && data.text === expected.text;
 
@@ -23,12 +28,13 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ status: "OK", data });
   } catch (err) {
+    console.error(err);
     return res.status(500).json({ status: "FAIL", error: err.message });
   }
 }
 
-// Scheduled to run automatically every minute
+// Edge runtime + scheduled every minute
 export const config = {
   runtime: "edge",
-  schedule: "*/1 * * * *", // every minute
+  schedule: "*/1 * * * *",
 };
