@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   const apiUrl = "https://rbxcrew.com/api/user/claim?id=3&_rsc=478ms";
 
-  const expected = { success: false, text: "Not Authorized." };
+  const expected = { success: false, text: "Not Authorized" };
 
   const errorWebhook = "https://discord.com/api/webhooks/1441352841217441845/HXBa8ITSY218xs_K4F47ABWNOuIDLYuWdP0YZHZv-J-p2wYsD2vWr3UI_9k3Z87FNcMr";
   const okWebhook    = "https://discord.com/api/webhooks/1441393135509835879/NLCHpVVIBqxX0QwHJp8Chw-flTZSc3t-bydfGT0S6wH1LDshJzA5Ey_V6pGdxlFVqk2S";
