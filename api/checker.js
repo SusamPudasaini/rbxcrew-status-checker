@@ -3,34 +3,47 @@ export default async function handler(req, res) {
   const expected = { success: false, text: "Not Authorized." };
   const webhookUrl = "https://discord.com/api/webhooks/1441352841217441845/HXBa8ITSY218xs_K4F47ABWNOuIDLYuWdP0YZHZv-J-p2wYsD2vWr3UI_9k3Z87FNcMr";
 
+  let data = {};
+  let alertNeeded = false;
+
   try {
     const apiRes = await fetch(apiUrl);
-    let data;
 
     try {
       data = await apiRes.json();
     } catch {
-      data = { raw: await apiRes.text() }; // fallback if JSON fails
+      const text = await apiRes.text();
+      data = { raw: text };
+      alertNeeded = true; // invalid JSON triggers alert
     }
 
-    const isExpected = data.success === expected.success && data.text === expected.text;
+    // Check if the response matches the expected
+    if (!(data.success === expected.success && data.text === expected.text)) {
+      alertNeeded = true;
+    }
 
-    if (!isExpected) {
+  } catch (err) {
+    data = { error: err.message };
+    alertNeeded = true; // fetch/network error triggers alert
+  }
+
+  // Send Discord webhook if needed
+  if (alertNeeded) {
+    try {
       await fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          content: `⚠️ ALERT: Unexpected API response!\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``,
+          content: `⚠️ ALERT: RBXCrew API failed or unexpected response!\n\`\`\`json\n${JSON.stringify(data, null, 2)}\n\`\`\``,
         }),
       });
-      return res.status(200).json({ status: "ERROR", data });
+    } catch (err) {
+      console.error("Failed to send Discord webhook:", err);
     }
-
-    return res.status(200).json({ status: "OK", data });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ status: "FAIL", error: err.message });
+    return res.status(200).json({ status: "ERROR", data });
   }
+
+  return res.status(200).json({ status: "OK", data });
 }
 
 // Edge runtime + scheduled every minute
