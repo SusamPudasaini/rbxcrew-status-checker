@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  const apiUrl = "https://rbxcrew.com/api/user/claim?id=3&_rsc=478ms";
 
   const expected = { success: false, text: "Not Authorized." };
 
