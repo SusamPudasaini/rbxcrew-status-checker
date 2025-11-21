@@ -7,24 +7,22 @@ export default async function handler(req, res) {
   let alertNeeded = false;
 
   try {
-    const apiRes = await fetch(apiUrl);
-
+    const apiRes = await fetch(apiUrl, { redirect: "follow" });
     try {
       data = await apiRes.json();
     } catch {
       const text = await apiRes.text();
       data = { raw: text };
-      alertNeeded = true; // invalid JSON triggers alert
+      alertNeeded = true;
     }
 
-    // Check if the response matches the expected
     if (!(data.success === expected.success && data.text === expected.text)) {
       alertNeeded = true;
     }
 
   } catch (err) {
     data = { error: err.message };
-    alertNeeded = true; // fetch/network error triggers alert
+    alertNeeded = true;
   }
 
   // Send Discord webhook if needed
@@ -44,10 +42,10 @@ export default async function handler(req, res) {
   }
 
   return res.status(200).json({ status: "OK", data });
-}
+};
 
-// Edge runtime + scheduled every minute
+// Node.js runtime + scheduled every minute
 export const config = {
-  runtime: "edge",
+  runtime: "nodejs",
   schedule: "*/1 * * * *",
 };
